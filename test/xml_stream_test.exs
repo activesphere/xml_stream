@@ -5,8 +5,8 @@ defmodule XmlStreamTest do
 
   test "node" do
     rows = Stream.map(1..100, fn i ->
-      cells = Stream.map(1..100, fn i ->
-        node("cell", %{}, const(to_string(i)))
+      cells = Stream.map(1..100, fn j ->
+        node("cell", %{row: to_string(i), column: to_string(j)}, const(to_string(i)))
       end)
       node("row", %{}, children(cells))
     end)

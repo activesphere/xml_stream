@@ -37,12 +37,12 @@ defmodule XmlStream do
   #TODO: escape according to spec
   def print({:open, name, attrs}) do
     attrs = Enum.map(attrs, fn {key, value} ->
-      [key, "=", inspect(value)]
+      [" ", to_string(key), "=", inspect(value)]
     end)
-    ["<", name, attrs, ">\n"]
+    ["<", to_string(name), attrs, ">\n"]
   end
   def print({:close, name}) do
-    ["</", name, ">\n"]
+    ["</", to_string(name), ">\n"]
   end
   def print({:const, value}) do
     [value, "\n"]
