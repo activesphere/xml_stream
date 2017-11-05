@@ -1,37 +1,20 @@
 defmodule XmlStream do
-  def node(name, attrs, body) do
-    fn ->
-      {
-        [{:open, name, attrs}],
-        [body, fn -> {[{:close, name}], []} end]
-      }
-    end
-  end
-
-  def children(bodies) do
-    fn ->
-      case Stream.take(bodies, 1) |> Enum.to_list do
-        [body] -> {[], [body, children(Stream.drop(bodies, 1))]}
-        [] -> {[], []}
-      end
-    end
+  def element(name, attrs, body) do
+    Stream.concat([[{:open, name, attrs}], body, [{:close, name}]])
   end
 
   def const(value) do
-    fn ->
-      {[{:const, value}], []}
-    end
+    [{:const, value}]
   end
 
-  def stream(builder) do
-    Stream.unfold({builder, []},
-      fn {nil, _} -> nil
-        {builder, stack} ->
-          case builder.() do
-            {items, [next | rest]} -> {items, {next, rest ++ stack}}
-            {items, []} -> {items, {List.first(stack), Enum.drop(stack, 1)}}
-          end
-      end)
+  def stream(node) do
+    Stream.transform(node, [], fn i, acc ->
+      if is_tuple(i) do
+        {[print(i)], acc}
+      else
+        {stream(i), acc}
+      end
+    end)
   end
 
   #TODO: escape according to spec

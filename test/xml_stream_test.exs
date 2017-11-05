@@ -6,14 +6,14 @@ defmodule XmlStreamTest do
   test "node" do
     rows = Stream.map(1..100, fn i ->
       cells = Stream.map(1..100, fn j ->
-        node("cell", %{row: to_string(i), column: to_string(j)}, const(to_string(i)))
+        element("cell", %{row: to_string(i), column: to_string(j)}, const(to_string(i)))
       end)
-      node("row", %{}, children(cells))
+      element("row", %{}, cells)
     end)
 
-    stream(node("sheet", %{}, children(rows)))
-    |> Stream.each(fn items ->
-      IO.write Enum.map(items, &print/1)
+    stream(element("sheet", %{}, rows))
+    |> Stream.each(fn item ->
+      IO.write item
     end)
     |> Stream.run
   end
