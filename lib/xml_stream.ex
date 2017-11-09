@@ -1,5 +1,4 @@
 defmodule XmlStream do
-  import XmlStream.Print.Pretty
 
   def element(name, attrs, body) do
     Stream.concat([[{:open, name, attrs}], body, [{:close, name}]])
@@ -19,11 +18,19 @@ defmodule XmlStream do
     end)
   end
 
-  def stream(node) do
+  def stream(node, options) do
+    printer = if options.pretty,
+      do: Module.concat(options.printer, Pretty),
+      else: Module.concat(options.printer, Minified)
+
     nodes_stream = stream_builder(node)
     Stream.transform(nodes_stream, [], fn i, acc ->
-      {acc, level} = update_acc(acc, i)
-      {[print(i, level)], acc}
+      if options.pretty do
+        {acc, level} = update_acc(acc, i)
+        {[printer.print(i, level)], acc}
+      else
+        {[printer.print(i)], acc}
+      end
     end)
   end
 
