@@ -27,21 +27,21 @@ defmodule XmlStream do
     end)
   end
 
-  defp update_acc(acc, i) do
-    if acc == [] do
-      {[i] ++ acc, 0}
+  defp update_acc(stack, i) do
+    if stack == [] do
+      {[i] ++ stack, 0}
     else
       curr_type = elem(i, 0)
       curr_name = elem(i, 1)
-      prev_name = elem(hd(acc), 1)
+      prev_name = elem(hd(stack), 1)
 
       cond do
         curr_type == :const ->
-          {acc, length(acc)}
+          {stack, length(stack)}
         curr_type == :close && curr_name == prev_name ->
-          {tl(acc), length(acc) - 1}
+          {tl(stack), length(stack) - 1}
         true ->
-          {[i] ++ acc, length(acc)}
+          {[i] ++ stack, length(stack)}
       end
     end
   end
