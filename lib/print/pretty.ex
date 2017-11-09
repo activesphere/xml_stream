@@ -14,4 +14,12 @@ defmodule XmlStream.Print.Pretty do
   def print({:const, value}) do
     [value, "\n"]
   end
+
+  def print(node, level) do
+    [indent(level)] ++ print(node)
+  end
+
+  defp indent(level, indent_with \\ "\t") do
+    String.duplicate(indent_with, level)
+  end
 end
