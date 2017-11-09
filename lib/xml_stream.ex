@@ -21,27 +21,30 @@ defmodule XmlStream do
   def stream(node, options) do
     printer = options.printer
     nodes_stream = stream_builder(node)
-    Stream.transform(nodes_stream, [], fn i, acc ->
-      {acc, level} = update_acc(acc, i)
+    acc = {[], 0}
+    Stream.transform(nodes_stream, acc, fn i, acc ->
+      acc = update_acc(i, acc)
+      level = elem(acc, 1)
       {[printer.print(i, level)], acc}
     end)
   end
 
-  defp update_acc(stack, i) do
-    if stack == [] do
-      {[i] ++ stack, 0}
+  defp update_acc(curr, {prev, level}) do
+    if prev == [] do
+      {curr, 0}
     else
-      curr_type = elem(i, 0)
-      curr_name = elem(i, 1)
-      prev_name = elem(hd(stack), 1)
-
+      curr_type = elem(curr, 0)
+      curr_name = elem(curr, 1)
+      prev_name = elem(prev, 1)
       cond do
         curr_type == :const ->
-          {stack, length(stack)}
-        curr_type == :close && curr_name == prev_name ->
-          {tl(stack), length(stack) - 1}
+          {prev, level + 1}
+        curr_type == :close ->
+          {curr, level - 1}
+        curr_type == :open && curr_name == prev_name ->
+          {curr, level}
         true ->
-          {[i] ++ stack, length(stack)}
+          {curr, level + 1}
       end
     end
   end
