@@ -12,8 +12,7 @@ defmodule XmlStreamTest do
     end)
 
     options = %{
-      printer: XmlStream.Print,
-      pretty: true
+      printer: XmlStream.Print.Pretty
     }
 
     stream(element("sheet", %{}, rows), options)

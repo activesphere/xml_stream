@@ -19,18 +19,11 @@ defmodule XmlStream do
   end
 
   def stream(node, options) do
-    printer = if options.pretty,
-      do: Module.concat(options.printer, Pretty),
-      else: Module.concat(options.printer, Minified)
-
+    printer = options.printer
     nodes_stream = stream_builder(node)
     Stream.transform(nodes_stream, [], fn i, acc ->
-      if options.pretty do
-        {acc, level} = update_acc(acc, i)
-        {[printer.print(i, level)], acc}
-      else
-        {[printer.print(i)], acc}
-      end
+      {acc, level} = update_acc(acc, i)
+      {[printer.print(i, level)], acc}
     end)
   end
 

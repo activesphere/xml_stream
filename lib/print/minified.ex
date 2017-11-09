@@ -15,7 +15,7 @@ defmodule XmlStream.Print.Minified do
     [value]
   end
 
-  def print(node) do
+  def print(node, level) do
     print(node)
   end
 end
