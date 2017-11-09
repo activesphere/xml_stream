@@ -4,14 +4,19 @@ defmodule XmlStreamTest do
   import XmlStream
 
   test "node" do
-    rows = Stream.map(1..100, fn i ->
-      cells = Stream.map(1..100, fn j ->
+    rows = Stream.map(1..2, fn i ->
+      cells = Stream.map(1..2, fn j ->
         element("cell", %{row: to_string(i), column: to_string(j)}, const(to_string(i)))
       end)
       element("row", %{}, cells)
     end)
 
-    stream(element("sheet", %{}, rows))
+    options = %{
+      printer: XmlStream.Print,
+      pretty: true
+    }
+
+    stream(element("sheet", %{}, rows), options)
     |> Stream.each(fn item ->
       IO.write item
     end)
