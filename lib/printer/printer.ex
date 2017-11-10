@@ -5,12 +5,24 @@ defmodule XmlStream.Print do
     end)
   end
 
+  #TODO: Escape according to spec
+  def escape(string) do
+    string
+    |> String.replace(">", "&gt;")
+    |> String.replace("<", "&lt;")
+    |> replace_ampersand
+  end
+
+  defp replace_ampersand(string) do
+    Regex.replace(~r/&(?!lt;|gt;|quot;)/, string, "&amp;")
+  end
+
   defmodule Pretty do
     alias XmlStream.Print, as: P
-
     @behaviour Printer
+
     def init(),  do: {[], 0}
-    #TODO: escape according to spec
+
     def print({:open, name, attrs}) do
       ["<", to_string(name), P.attrs_to_string(attrs), ">\n"]
     end
@@ -28,7 +40,7 @@ defmodule XmlStream.Print do
     end
 
     def print({:const, value}) do
-      [value, "\n"]
+      [P.escape(value), "\n"]
     end
 
     def print(node, acc) do
@@ -68,10 +80,10 @@ defmodule XmlStream.Print do
 
   defmodule Minified do
     alias XmlStream.Print, as: P
-
     @behaviour Printer
+
     def init(), do: nil
-    #TODO: escape according to spec
+
     def print({:open, name, attrs}) do
       ["<", to_string(name), P.attrs_to_string(attrs), ">"]
     end
@@ -89,7 +101,7 @@ defmodule XmlStream.Print do
     end
 
     def print({:const, value}) do
-      [value]
+      [P.escape(value)]
     end
 
     def print(node, _) do
