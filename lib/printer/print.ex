@@ -1,8 +1,6 @@
 defmodule XmlStream.Print do
-
-
-
   defmodule Pretty do
+    @behaviour Printer
     #TODO: escape according to spec
     def print({:open, name, attrs}) do
       attrs = Enum.map(attrs, fn {key, value} ->
@@ -51,6 +49,7 @@ defmodule XmlStream.Print do
   end
 
   defmodule Minified do
+    @behaviour Printer
     #TODO: escape according to spec
     def print({:open, name, attrs}) do
       attrs = Enum.map(attrs, fn {key, value} ->
@@ -68,8 +67,7 @@ defmodule XmlStream.Print do
     end
 
     def print(node, _) do
-      print(node)
+      {print(node), nil}
     end
   end
-
 end
