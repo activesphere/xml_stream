@@ -19,22 +19,22 @@ defmodule XmlStream do
     [{:const, value}]
   end
 
-  def stream_builder(node) do
-    Stream.flat_map(node, fn operation ->
-      if is_tuple(operation) do
-        [operation]
-      else
-        stream_builder(operation)
-      end
-    end)
-  end
-
   def stream(node, options) do
     printer = options[:printer]
     nodes_stream = stream_builder(node)
     acc = {[], 0}
     Stream.transform(nodes_stream, acc, fn i, acc ->
       printer.print(i, acc)
+    end)
+  end
+
+  defp stream_builder(node) do
+    Stream.flat_map(node, fn operation ->
+      if is_tuple(operation) do
+        [operation]
+      else
+        stream_builder(operation)
+      end
     end)
   end
 end
