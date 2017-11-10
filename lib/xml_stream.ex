@@ -18,7 +18,7 @@ defmodule XmlStream do
   end
 
   def stream(node, options) do
-    printer = options.printer
+    printer = options[:printer]
     nodes_stream = stream_builder(node)
     acc = {[], 0}
     Stream.transform(nodes_stream, acc, fn i, acc ->

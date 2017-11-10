@@ -11,9 +11,9 @@ defmodule XmlStreamTest do
       element("row", %{}, cells)
     end)
 
-    options = %{
+    options = [
       printer: XmlStream.Print.Pretty
-    }
+    ]
 
     stream(element("sheet", %{}, rows), options)
     |> Stream.each(fn item ->
