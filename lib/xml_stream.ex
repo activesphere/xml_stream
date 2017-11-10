@@ -20,11 +20,11 @@ defmodule XmlStream do
   end
 
   def stream_builder(node) do
-    Stream.transform(node, [], fn i, acc ->
-      if is_tuple(i) do
-        {[i], acc}
+    Stream.flat_map(node, fn operation ->
+      if is_tuple(operation) do
+        [operation]
       else
-        {stream_builder(i), acc}
+        stream_builder(operation)
       end
     end)
   end
