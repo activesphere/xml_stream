@@ -1,11 +1,24 @@
 defmodule XmlStream.Print do
   def attrs_to_string(attrs) do
     Enum.map(attrs, fn {key, value} ->
-      [" ", to_string(key), "=", inspect(value)]
+      [" ", to_string(key), "=", quote_attribute_value(value)]
     end)
   end
 
   #TODO: Escape according to spec
+  defp quote_attribute_value(val) do
+    double = String.contains?(val, ~s|"|)
+    single = String.contains?(val, "'")
+    escaped = escape(val)
+
+    cond do
+      double && single ->
+        escaped |> String.replace("\"", "&quot;") |> quote_attribute_value
+      double -> "'#{escaped}'"
+      true -> ~s|"#{escaped}"|
+    end
+  end
+
   def escape(string) do
     string
     |> String.replace(">", "&gt;")
