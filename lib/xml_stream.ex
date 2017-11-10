@@ -1,9 +1,14 @@
 defmodule XmlStream do
+
+  def declaration(attrs \\ %{version: "1.0", encoding: "UTF-8"}) do
+    [{:decl, attrs}]
+  end
+
   def element(name, attrs, body) do
     Stream.concat([[{:open, name, attrs}], body, [{:close, name}]])
   end
 
-  def const(value) do
+  def content(value) do
     [{:const, value}]
   end
 

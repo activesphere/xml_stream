@@ -6,7 +6,7 @@ defmodule XmlStreamTest do
   test "node" do
     rows = Stream.map(1..2, fn i ->
       cells = Stream.map(1..2, fn j ->
-        element("cell", %{row: to_string(i), column: to_string(j)}, const(to_string(i)))
+        element("cell", %{row: to_string(i), column: to_string(j)}, content(to_string(i)))
       end)
       element("row", %{}, cells)
     end)
@@ -15,7 +15,7 @@ defmodule XmlStreamTest do
       printer: XmlStream.Print.Pretty
     ]
 
-    stream(element("sheet", %{}, rows), options)
+    stream([declaration(), element("sheet", %{}, rows)], options)
     |> Stream.each(fn item ->
       IO.write item
     end)

@@ -1,16 +1,26 @@
 defmodule XmlStream.Print do
+  def attrs_to_string(attrs) do
+    Enum.map(attrs, fn {key, value} ->
+      [" ", to_string(key), "=", inspect(value)]
+    end)
+  end
+
   defmodule Pretty do
+    alias XmlStream.Print, as: P
+
     @behaviour Printer
     #TODO: escape according to spec
     def print({:open, name, attrs}) do
-      attrs = Enum.map(attrs, fn {key, value} ->
-        [" ", to_string(key), "=", inspect(value)]
-      end)
-      ["<", to_string(name), attrs, ">\n"]
+
+      ["<", to_string(name), P.attrs_to_string(attrs), ">\n"]
     end
 
     def print({:close, name}) do
       ["</", to_string(name), ">\n"]
+    end
+
+    def print({:decl, attrs}) do
+      ["<?xml", P.attrs_to_string(attrs), "?>\n"]
     end
 
     def print({:const, value}) do
@@ -37,6 +47,8 @@ defmodule XmlStream.Print do
         cond do
           curr_type == :const ->
             {prev, level + 1}
+          curr_type == :decl ->
+            {prev, level}
           curr_type == :close ->
             {curr, level - 1}
           curr_type == :open && curr_name == prev_name ->
@@ -50,16 +62,19 @@ defmodule XmlStream.Print do
 
   defmodule Minified do
     @behaviour Printer
+    alias XmlStream.Print, as: P
+
     #TODO: escape according to spec
     def print({:open, name, attrs}) do
-      attrs = Enum.map(attrs, fn {key, value} ->
-        [" ", to_string(key), "=", inspect(value)]
-      end)
-      ["<", to_string(name), attrs, ">"]
+      ["<", to_string(name), P.attrs_to_string(attrs), ">"]
     end
 
     def print({:close, name}) do
       ["</", to_string(name), ">"]
+    end
+
+    def print({:decl, attrs}) do
+      ["<?xml", P.attrs_to_string(attrs), "?>"]
     end
 
     def print({:const, value}) do
