@@ -11,7 +11,6 @@ defmodule XmlStream.Print do
     @behaviour Printer
     #TODO: escape according to spec
     def print({:open, name, attrs}) do
-
       ["<", to_string(name), P.attrs_to_string(attrs), ">\n"]
     end
 
@@ -21,6 +20,10 @@ defmodule XmlStream.Print do
 
     def print({:decl, attrs}) do
       ["<?xml", P.attrs_to_string(attrs), "?>\n"]
+    end
+
+    def print({:empty_elem, name, attrs}) do
+      ["<", to_string(name), P.attrs_to_string(attrs), "/>\n"]
     end
 
     def print({:const, value}) do
@@ -49,6 +52,8 @@ defmodule XmlStream.Print do
             {prev, level + 1}
           curr_type == :decl ->
             {prev, level}
+          curr_type == :empty_elem ->
+            {prev, level}
           curr_type == :close ->
             {curr, level - 1}
           curr_type == :open && curr_name == prev_name ->
@@ -75,6 +80,10 @@ defmodule XmlStream.Print do
 
     def print({:decl, attrs}) do
       ["<?xml", P.attrs_to_string(attrs), "?>"]
+    end
+
+    def print({:empty_elem, name, attrs}) do
+      ["<", to_string(name), P.attrs_to_string(attrs), "/>"]
     end
 
     def print({:const, value}) do

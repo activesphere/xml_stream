@@ -4,6 +4,13 @@ defmodule XmlStream do
     [{:decl, attrs}]
   end
 
+  def empty_element(name, args \\ %{}) do
+    [{:empty_elem, name, args}]
+  end
+
+  def element(name, body) do
+    element(name, %{}, body)
+  end
   def element(name, attrs, body) do
     Stream.concat([[{:open, name, attrs}], body, [{:close, name}]])
   end

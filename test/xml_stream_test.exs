@@ -15,7 +15,7 @@ defmodule XmlStreamTest do
       printer: XmlStream.Print.Pretty
     ]
 
-    stream([declaration(), element("sheet", %{}, rows)], options)
+    stream([declaration(), empty_element("workbook", %{date: "false"}), element("sheet", %{}, rows)], options)
     |> Stream.each(fn item ->
       IO.write item
     end)
