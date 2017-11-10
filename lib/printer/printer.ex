@@ -9,6 +9,7 @@ defmodule XmlStream.Print do
     alias XmlStream.Print, as: P
 
     @behaviour Printer
+    def init(),  do: {[], 0}
     #TODO: escape according to spec
     def print({:open, name, attrs}) do
       ["<", to_string(name), P.attrs_to_string(attrs), ">\n"]
@@ -66,9 +67,10 @@ defmodule XmlStream.Print do
   end
 
   defmodule Minified do
-    @behaviour Printer
     alias XmlStream.Print, as: P
 
+    @behaviour Printer
+    def init(), do: nil
     #TODO: escape according to spec
     def print({:open, name, attrs}) do
       ["<", to_string(name), P.attrs_to_string(attrs), ">"]

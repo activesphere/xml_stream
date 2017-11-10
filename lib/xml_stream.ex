@@ -22,7 +22,7 @@ defmodule XmlStream do
   def stream(node, options) do
     printer = options[:printer]
     nodes_stream = stream_builder(node)
-    acc = {[], 0}
+    acc = printer.init()
     Stream.transform(nodes_stream, acc, fn i, acc ->
       printer.print(i, acc)
     end)

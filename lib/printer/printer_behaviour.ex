@@ -5,4 +5,5 @@ defmodule Printer do
   @type acc :: {element, number}
 
   @callback print(element, acc | nil) :: {[String.t], acc | nil}
+  @callback init() :: term
 end
