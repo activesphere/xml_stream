@@ -78,7 +78,7 @@ defmodule XmlStream.Print do
     end
   end
 
-  defmodule Minified do
+  defmodule Ugly do
     alias XmlStream.Print, as: P
     @behaviour Printer
 
