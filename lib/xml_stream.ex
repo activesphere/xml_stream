@@ -1,6 +1,6 @@
 defmodule XmlStream do
 
-  def declaration(attrs \\ %{version: "1.0", encoding: "UTF-8"}) do
+  def declaration(attrs \\ [version: "1.0", encoding: "UTF-8"]) do
     [{:decl, attrs}]
   end
 
