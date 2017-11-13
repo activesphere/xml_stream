@@ -1,33 +1,21 @@
 defmodule XmlStream.Print do
   def attrs_to_string(attrs) do
     Enum.map(attrs, fn {key, value} ->
-      [" ", to_string(key), "=", quote_attribute_value(to_string(value))]
+      [" ", to_string(key), "=", wrap_quotes(escape(value))]
     end)
   end
 
-  #TODO: Escape according to spec
-  defp quote_attribute_value(val) do
-    double = String.contains?(val, ~s|"|)
-    single = String.contains?(val, "'")
-    escaped = escape(val)
-
-    cond do
-      double && single ->
-        escaped |> String.replace("\"", "&quot;") |> quote_attribute_value
-      double -> "'#{escaped}'"
-      true -> ~s|"#{escaped}"|
-    end
+  def wrap_quotes(string) do
+    ~s(") <> string <> ~s(")
   end
 
-  def escape(string) do
-    string
-    |> String.replace(">", "&gt;")
-    |> String.replace("<", "&lt;")
-    |> replace_ampersand
-  end
-
-  defp replace_ampersand(string) do
-    Regex.replace(~r/&(?!lt;|gt;|quot;)/, string, "&amp;")
+  def escape(data) do
+    to_string(data)
+    |> :binary.replace("&", "&amp;")
+    |> :binary.replace("\"", "&quot;")
+    |> :binary.replace("'", "&apos;")
+    |> :binary.replace("<", "&lt;")
+    |> :binary.replace(">", "&gt;")
   end
 
   defmodule Pretty do
@@ -53,7 +41,7 @@ defmodule XmlStream.Print do
     end
 
     def print({:const, value}) do
-      [P.escape(to_string(value))]
+      [P.escape(value)]
     end
 
     def print(node, acc) do
@@ -127,7 +115,7 @@ defmodule XmlStream.Print do
     end
 
     def print({:const, value}) do
-      [P.escape(to_string(value))]
+      [P.escape(value)]
     end
 
     def print(node, _) do
