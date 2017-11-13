@@ -37,29 +37,33 @@ defmodule XmlStream.Print do
     def init(),  do: {[], 0}
 
     def print({:open, name, attrs}) do
-      ["<", to_string(name), P.attrs_to_string(attrs), ">\n"]
+      ["<", to_string(name), P.attrs_to_string(attrs), ">"]
     end
 
     def print({:close, name}) do
-      ["</", to_string(name), ">\n"]
+      ["</", to_string(name), ">"]
     end
 
     def print({:decl, attrs}) do
-      ["<?xml", P.attrs_to_string(attrs), "?>\n"]
+      ["<?xml", P.attrs_to_string(attrs), "?>"]
     end
 
     def print({:empty_elem, name, attrs}) do
-      ["<", to_string(name), P.attrs_to_string(attrs), "/>\n"]
+      ["<", to_string(name), P.attrs_to_string(attrs), "/>"]
     end
 
     def print({:const, value}) do
-      [P.escape(value), "\n"]
+      [P.escape(value)]
     end
 
     def print(node, acc) do
-      acc = update_acc(node, acc)
+      {acc, newline} = update_acc(node, acc)
       level = elem(acc, 1)
-      {[indent(level), print(node)], acc}
+      if newline do
+        {["\n", indent(level), print(node)], acc}
+      else
+        {[print(node)], acc}
+      end
     end
 
     defp indent(level, indent_with \\ "\t") do
@@ -67,25 +71,34 @@ defmodule XmlStream.Print do
     end
 
     defp update_acc(curr, {prev, level}) do
+      curr_name = elem(curr, 1)
+      curr_type = elem(curr, 0)
       if prev == [] do
-        {curr, 0}
+        cond do
+          curr_type == :decl ->
+            {{prev, 0}, false}
+          curr_type == :empty_elem ->
+            {{prev, level}, true}
+          true ->
+            {{curr, 0}, true}
+        end
       else
-        curr_type = elem(curr, 0)
-        curr_name = elem(curr, 1)
         prev_name = elem(prev, 1)
         cond do
           curr_type == :const ->
-            {prev, level + 1}
-          curr_type == :decl ->
-            {prev, level}
+            {{prev, level}, false}
           curr_type == :empty_elem ->
-            {prev, level}
+            {{prev, level}, true}
           curr_type == :close ->
-            {curr, level - 1}
+            if curr_name == prev_name do
+              {{curr, level}, false}
+            else
+              {{curr, level - 1}, true}
+            end
           curr_type == :open && curr_name == prev_name ->
-            {curr, level}
+            {{curr, level}, true}
           true ->
-            {curr, level + 1}
+            {{curr, level + 1}, true}
         end
       end
     end
