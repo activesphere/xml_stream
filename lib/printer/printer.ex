@@ -11,11 +11,11 @@ defmodule XmlStream.Print do
 
   def escape(data) do
     to_string(data)
-    |> :binary.replace("&", "&amp;")
-    |> :binary.replace("\"", "&quot;")
-    |> :binary.replace("'", "&apos;")
-    |> :binary.replace("<", "&lt;")
-    |> :binary.replace(">", "&gt;")
+    |> :binary.replace("&", "&amp;", [:global])
+    |> :binary.replace("\"", "&quot;", [:global])
+    |> :binary.replace("'", "&apos;", [:global])
+    |> :binary.replace("<", "&lt;", [:global])
+    |> :binary.replace(">", "&gt;", [:global])
   end
 
   defmodule Pretty do
