@@ -1,7 +1,7 @@
 defmodule XmlStream.Print do
   def attrs_to_string(attrs) do
     Enum.map(attrs, fn {key, value} ->
-      [" ", to_string(key), "=", quote_attribute_value(value)]
+      [" ", to_string(key), "=", quote_attribute_value(to_string(value))]
     end)
   end
 
@@ -53,7 +53,7 @@ defmodule XmlStream.Print do
     end
 
     def print({:const, value}) do
-      [P.escape(value)]
+      [P.escape(to_string(value))]
     end
 
     def print(node, acc) do
@@ -127,7 +127,7 @@ defmodule XmlStream.Print do
     end
 
     def print({:const, value}) do
-      [P.escape(value)]
+      [P.escape(to_string(value))]
     end
 
     def print(node, _) do
