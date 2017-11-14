@@ -12,7 +12,7 @@ defmodule XmlStream do
     element(name, %{}, body)
   end
   def element(name, attrs, body) do
-    Stream.concat([[{:open, name, attrs}], body, [{:close, name}]])
+    [[{:open, name, attrs}], body, [{:close, name}]]
   end
 
   def content(value) do
