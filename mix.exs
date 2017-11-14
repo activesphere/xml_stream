@@ -1,12 +1,21 @@
 defmodule XmlStream.Mixfile do
   use Mix.Project
 
+  @version "0.1.0"
+
   def project do
     [
       app: :xml_stream,
-      version: "0.1.0",
-      elixir: "~> 1.5",
+      version: @version,
+      elixir: "~> 1.4",
       start_permanent: Mix.env == :prod,
+      description: "Streaming XML builder",
+      package: package(),
+      docs: docs(),
+      dialyzer: [
+        plt_add_deps: :transitive,
+        flags: [:unmatched_returns, :race_conditions, :error_handling, :underspecs]
+      ],
       deps: deps()
     ]
   end
@@ -19,6 +28,20 @@ defmodule XmlStream.Mixfile do
 
   defp deps do
     [
+      {:ex_doc, "~> 0.18", only: :dev}
     ]
+  end
+
+  defp package do
+    %{licenses: ["MIT"],
+      links: %{"Github" => "https://github.com/activesphere/xml_stream"},
+      maintainers: ["ananthakumaran@gmail.com", "shinde.rohitt@gmail.com"]}
+  end
+
+  defp docs do
+    [source_url: "https://github.com/activesphere/xml_stream",
+     source_ref: "v#{@version}",
+     main: XmlStream,
+     extras: ["README.md"]]
   end
 end
