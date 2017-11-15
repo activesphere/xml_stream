@@ -1,27 +1,18 @@
 defmodule XmlStream.Print do
   def attrs_to_string(attrs) do
     Enum.map(attrs, fn {key, value} ->
-      [" ", to_string(key), "=", wrap_quotes(escape(value))]
+      [" ", to_string(key), ~s(="), escape_binary(to_string(value)), ~s(")]
     end)
   end
 
-  def wrap_quotes(string) do
-    ~s(") <> string <> ~s(")
-  end
+  def escape_binary(""), do: []
+  def escape_binary("&" <> rest), do: ["&amp;" | escape_binary(rest)]
+  def escape_binary("\"" <> rest), do: ["&quot;" | escape_binary(rest)]
+  def escape_binary("'" <> rest), do: ["&apos;" | escape_binary(rest)]
+  def escape_binary("<" <> rest), do: ["&lt;" | escape_binary(rest)]
+  def escape_binary(">" <> rest), do: ["&gt;" | escape_binary(rest)]
+  def escape_binary(<<char :: utf8>> <> rest), do: [char | escape_binary(rest)]
 
-  def escape(data) do
-    data = to_string(data)
-    case :binary.match(data, ["&", "\"", "'", "<", ">"]) do
-      {_, _} ->
-        data
-        |> :binary.replace("&", "&amp;", [:global])
-        |> :binary.replace("\"", "&quot;", [:global])
-        |> :binary.replace("'", "&apos;", [:global])
-        |> :binary.replace("<", "&lt;", [:global])
-        |> :binary.replace(">", "&gt;", [:global])
-      :nomatch -> data
-    end
-  end
 
   defmodule Pretty do
     alias XmlStream.Print, as: P
@@ -46,7 +37,7 @@ defmodule XmlStream.Print do
     end
 
     def print({:const, value}) do
-      [P.escape(value)]
+      [P.escape_binary(to_string(value))]
     end
 
     def print(node, acc) do
@@ -103,28 +94,30 @@ defmodule XmlStream.Print do
 
     def init(), do: nil
 
-    def print({:open, name, attrs}) do
-      ["<", to_string(name), P.attrs_to_string(attrs), ">"]
+    def print({:open, name, attrs}, _) when attrs == %{} or attrs == [] do
+      {["<", to_string(name), ">"], nil}
+    end
+    def print({:open, name, attrs}, _) do
+      {["<", to_string(name), P.attrs_to_string(attrs), ">"], nil}
     end
 
-    def print({:close, name}) do
-      ["</", to_string(name), ">"]
+    def print({:close, name}, _) do
+      {["</", to_string(name), ">"], nil}
     end
 
-    def print({:decl, attrs}) do
-      ["<?xml", P.attrs_to_string(attrs), "?>"]
+    def print({:decl, attrs}, _) do
+      {["<?xml", P.attrs_to_string(attrs), "?>"], nil}
     end
 
-    def print({:empty_elem, name, attrs}) do
-      ["<", to_string(name), P.attrs_to_string(attrs), "/>"]
+    def print({:empty_elem, name, attrs}, _) when attrs == %{} or attrs == [] do
+      {["<", to_string(name), "/>"], nil}
+    end
+    def print({:empty_elem, name, attrs}, _) do
+      {["<", to_string(name), P.attrs_to_string(attrs), "/>"], nil}
     end
 
-    def print({:const, value}) do
-      [P.escape(value)]
-    end
-
-    def print(node, _) do
-      {print(node), nil}
+    def print({:const, value}, _) do
+      {[P.escape_binary(to_string(value))], nil}
     end
   end
 end
