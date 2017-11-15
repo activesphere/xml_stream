@@ -18,7 +18,7 @@ defmodule XmlStream.Print do
     alias XmlStream.Print, as: P
     @behaviour Printer
 
-    def init(),  do: {[], 0}
+    def init(),  do: {0, false}
 
     def print({:open, name, attrs}) do
       ["<", to_string(name), P.attrs_to_string(attrs), ">"]
@@ -41,49 +41,26 @@ defmodule XmlStream.Print do
     end
 
     def print(node, acc) do
-      {acc, newline} = update_acc(node, acc)
-      level = elem(acc, 1)
-      if newline do
-        {["\n", indent(level), print(node)], acc}
-      else
-        {[print(node)], acc}
-      end
+      {acc, alignment} = calculate_alignment(node, acc)
+      {[alignment, print(node)], acc}
     end
 
     defp indent(level, indent_with \\ "\t") do
       String.duplicate(indent_with, level)
     end
 
-    defp update_acc(curr, {prev, level}) do
-      curr_name = elem(curr, 1)
-      curr_type = elem(curr, 0)
-      if prev == [] do
-        cond do
-          curr_type == :decl ->
-            {{prev, 0}, false}
-          curr_type == :empty_elem ->
-            {{prev, level}, true}
-          true ->
-            {{curr, 0}, true}
-        end
-      else
-        prev_name = elem(prev, 1)
-        cond do
-          curr_type == :const ->
-            {{prev, level}, false}
-          curr_type == :empty_elem ->
-            {{prev, level}, true}
-          curr_type == :close ->
-            if curr_name == prev_name do
-              {{curr, level}, false}
-            else
-              {{curr, level - 1}, true}
-            end
-          curr_type == :open && curr_name == prev_name ->
-            {{curr, level}, true}
-          true ->
-            {{curr, level + 1}, true}
-        end
+    defp calculate_alignment(node, {level, last}) do
+      case elem(node, 0) do
+        :open -> {{level + 1, false}, ["\n", indent(level)]}
+        :const -> {{level - 1, true}, []}
+        :close ->
+          if last do
+            {{level, false}, []}
+          else
+            {{level - 1, false}, ["\n", indent(level - 1)]}
+          end
+        :empty_elem -> {{level, false}, ["\n", indent(level)]}
+        _ -> {{level, false}, [indent(level)]}
       end
     end
   end
