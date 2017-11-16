@@ -19,10 +19,12 @@ defmodule XmlStream do
     [{:const, value}]
   end
 
-  def stream(node, options \\ [printer: XmlStream.Print.Ugly]) do
+  @default_options [printer: XmlStream.Print.Ugly, indent_with: "\t"]
+  def stream(node, options \\ []) do
+    options = Keyword.merge(@default_options, options)
     printer = options[:printer]
     nodes_stream = stream_builder(node)
-    Stream.transform(nodes_stream, printer.init(), &printer.print/2)
+    Stream.transform(nodes_stream, printer.init(options), &printer.print/2)
   end
 
   defp stream_builder(node) do

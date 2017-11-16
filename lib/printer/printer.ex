@@ -18,7 +18,9 @@ defmodule XmlStream.Print do
     alias XmlStream.Print, as: P
     @behaviour Printer
 
-    def init(),  do: {0, false}
+    def init(options \\ [indent_with: "\t"]) do
+      {0, false, options}
+    end
 
     def print({:open, name, attrs}) do
       ["<", to_string(name), P.attrs_to_string(attrs), ">"]
@@ -45,7 +47,7 @@ defmodule XmlStream.Print do
       {[alignment, print(node)], acc}
     end
 
-    defp indent(level, indent_with \\ "\t") do
+    defp indent(level, indent_with) do
       String.duplicate(indent_with, level)
     end
 
@@ -53,18 +55,20 @@ defmodule XmlStream.Print do
       if num > 0, do: num - 1, else: 0
     end
 
-    defp calculate_alignment(node, {level, last}) do
+    defp calculate_alignment(node, {level, last, opt}) do
+      indent_with = opt[:indent_with]
       case elem(node, 0) do
-        :open -> {{level + 1, false}, ["\n", indent(level)]}
-        :const -> {{safe_subtract(level), true}, []}
+        :open -> {{level + 1, false, opt}, ["\n", indent(level, indent_with)]}
+        :const -> {{safe_subtract(level), true, opt}, []}
         :close ->
           if last do
-            {{level, false}, []}
+            {{level, false, opt}, []}
           else
-            {{safe_subtract(level), false}, ["\n", indent(safe_subtract(level))]}
+            new_level = safe_subtract(level)
+            {{new_level, false, opt}, ["\n", indent(new_level, indent_with)]}
           end
-        :empty_elem -> {{level, false}, ["\n", indent(level)]}
-        _ -> {{level, false}, [indent(level)]}
+        :empty_elem -> {{level, false, opt}, ["\n", indent(level, indent_with)]}
+        _ -> {{level, false, opt}, [indent(level, indent_with)]}
       end
     end
   end
@@ -73,7 +77,7 @@ defmodule XmlStream.Print do
     alias XmlStream.Print, as: P
     @behaviour Printer
 
-    def init(), do: nil
+    def init(_), do: nil
 
     def print({:open, name, attrs}, _) when attrs == %{} or attrs == [] do
       {["<", to_string(name), ">"], nil}
