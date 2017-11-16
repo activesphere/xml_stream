@@ -26,14 +26,14 @@ defmodule XmlStreamTest do
     )
   ]
 
-  defp doc_string(elem_stream, options \\ [printer: XmlStream.Print.Ugly]) do
+  defp doc_string(elem_stream, options \\ [printer: XmlStream.Printer.Ugly]) do
     stream(elem_stream, options)
     |> Enum.to_list
     |> Enum.join("")
   end
 
   defp pretty_out(indent_with \\ "\t") do
-    doc_string(@sample_xml, [printer: XmlStream.Print.Pretty, indent_with: indent_with])
+    doc_string(@sample_xml, [printer: XmlStream.Printer.Pretty, indent_with: indent_with])
   end
 
   defp ugly_out() do
@@ -140,7 +140,7 @@ defmodule XmlStreamTest do
 
     usage_before = memory_now()
     Logger.debug "Memory usage before: #{usage_before}"
-    stream([declaration(), element("sheet", rows)], [printer: XmlStream.Print.Pretty])
+    stream([declaration(), element("sheet", rows)], [printer: XmlStream.Printer.Pretty])
     |> Stream.run
 
     usage_after = memory_now()
@@ -151,7 +151,11 @@ defmodule XmlStreamTest do
   test "Pretty Printer indent level" do
     broken_elem = element("pre", [content("foo"), empty_element("br")])
     broken_xml = List.insert_at(@sample_xml, 2, broken_elem)
-    stream(broken_xml, [printer: XmlStream.Print.Pretty])
+    stream(broken_xml, [printer: XmlStream.Printer.Pretty])
     |> Stream.run
+  end
+
+  test "utf8" do
+    assert doc_string(element("head", content("一般事項"))) == "<head>一般事項</head>"
   end
 end

@@ -1,4 +1,13 @@
-defmodule XmlStream.Print do
+defmodule XmlStream.Printer do
+  @type element_types :: :open | :const | :close
+  @type attrs :: %{required(String.t) => String.t}
+  @type element :: {element_types, String.t, attrs}
+  @type acc :: {element, number}
+
+  @callback print(element, acc | nil) :: {[String.t], acc | nil}
+  @callback init(term) :: term
+
+
   def attrs_to_string(attrs) do
     Enum.map(attrs, fn {key, value} ->
       [" ", to_string(key), ~s(="), escape_binary(to_string(value)), ~s(")]
@@ -15,7 +24,7 @@ defmodule XmlStream.Print do
 
 
   defmodule Pretty do
-    alias XmlStream.Print, as: P
+    alias XmlStream.Printer, as: P
     @behaviour Printer
 
     def init(options \\ [indent_with: "\t"]) do
@@ -74,7 +83,7 @@ defmodule XmlStream.Print do
   end
 
   defmodule Ugly do
-    alias XmlStream.Print, as: P
+    alias XmlStream.Printer, as: P
     @behaviour Printer
 
     def init(_), do: nil
