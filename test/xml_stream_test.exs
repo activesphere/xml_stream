@@ -5,6 +5,50 @@ defmodule XmlStreamTest do
   import XmlStream
   import SweetXml, only: [sigil_x: 2, xpath: 2, parse: 1]
 
+  # Helper functions, constants
+  @sample_xml [
+    declaration(),
+    empty_element("workbook", %{date: "false"}),
+    element("sheet",
+      [empty_element("row"),
+       element("row",
+         [
+           element("cell", %{foo: "bar"}, content("1")),
+           empty_element("cell")
+         ]),
+       element("row",
+         [
+           empty_element("cell"),
+           element("cell", %{foo: "bar"}, content("1")),
+         ]),
+       empty_element("row")
+      ]
+    )
+  ]
+
+  defp doc_string(elem_stream, options \\ [printer: XmlStream.Print.Ugly]) do
+    stream(elem_stream, options)
+    |> Enum.to_list
+    |> Enum.join("")
+  end
+
+  defp pretty_out() do
+    doc_string(@sample_xml, [printer: XmlStream.Print.Pretty])
+  end
+
+  defp ugly_out() do
+    doc_string(@sample_xml)
+  end
+
+  defp assert_xpath(doc, path, expected) do
+    assert xpath(doc, path) == expected
+  end
+
+  def memory_now do
+    (:erlang.memory() |> Keyword.fetch!(:total)) / (1024 * 1024)
+  end
+
+  # Tests
   test "Pretty Print" do
     expected_pretty = """
 <?xml version="1.0" encoding="UTF-8"?>
@@ -92,45 +136,10 @@ defmodule XmlStreamTest do
     assert usage_after - usage_before <= 5
   end
 
-  @sample_xml [
-    declaration(),
-    empty_element("workbook", %{date: "false"}),
-    element("sheet",
-      [empty_element("row"),
-       element("row",
-         [
-           element("cell", %{foo: "bar"}, content("1")),
-           empty_element("cell")
-         ]),
-       element("row",
-         [
-           empty_element("cell"),
-           element("cell", %{foo: "bar"}, content("1")),
-         ]),
-       empty_element("row")
-      ]
-    )
-  ]
-
-  defp doc_string(elem_stream, options \\ [printer: XmlStream.Print.Ugly]) do
-    stream(elem_stream, options)
-    |> Enum.to_list
-    |> Enum.join("")
-  end
-
-  defp pretty_out() do
-    doc_string(@sample_xml, [printer: XmlStream.Print.Pretty])
-  end
-
-  defp ugly_out() do
-    doc_string(@sample_xml)
-  end
-
-  defp assert_xpath(doc, path, expected) do
-    assert xpath(doc, path) == expected
-  end
-
-  def memory_now do
-    (:erlang.memory() |> Keyword.fetch!(:total)) / (1024 * 1024)
+  test "Pretty Printer indent level" do
+    broken_elem = element("pre", [content("foo"), empty_element("br")])
+    broken_xml = List.insert_at(@sample_xml, 2, broken_elem)
+    stream(broken_xml, [printer: XmlStream.Print.Pretty])
+    |> Stream.run
   end
 end
