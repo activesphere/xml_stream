@@ -157,5 +157,9 @@ defmodule XmlStreamTest do
 
   test "utf8" do
     assert doc_string(element("head", content("一般事項"))) == "<head>一般事項</head>"
+    assert doc_string(element("head", content("一般'事項"))) == "<head>一般&apos;事項</head>"
+    assert doc_string(element("author", %{name: "कफ़न"}, content(""))) == "<author name=\"कफ़न\"></author>"
+    assert doc_string(element("author", %{name: "कफ़'न"}, content(""))) == "<author name=\"कफ़&apos;न\"></author>"
+
   end
 end
