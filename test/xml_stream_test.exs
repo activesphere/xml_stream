@@ -32,8 +32,8 @@ defmodule XmlStreamTest do
     |> Enum.join("")
   end
 
-  defp pretty_out() do
-    doc_string(@sample_xml, [printer: XmlStream.Print.Pretty])
+  defp pretty_out(indent_with \\ "\t") do
+    doc_string(@sample_xml, [printer: XmlStream.Print.Pretty, indent_with: indent_with])
   end
 
   defp ugly_out() do
@@ -49,7 +49,7 @@ defmodule XmlStreamTest do
   end
 
   # Tests
-  test "Pretty Print" do
+  test "Pretty Print (tabs)" do
     expected_pretty = """
 <?xml version="1.0" encoding="UTF-8"?>
 <workbook date="false"/>
@@ -68,6 +68,26 @@ defmodule XmlStreamTest do
 """
 
     assert expected_pretty == pretty_out() <> "\n"
+  end
+
+  test "Pretty Print (spaces)" do
+    expected_pretty = """
+<?xml version="1.0" encoding="UTF-8"?>
+<workbook date="false"/>
+<sheet>
+ <row/>
+ <row>
+  <cell foo="bar">1</cell>
+  <cell/>
+ </row>
+ <row>
+  <cell/>
+  <cell foo="bar">1</cell>
+ </row>
+ <row/>
+</sheet>
+"""
+    assert expected_pretty == pretty_out(" ") <> "\n"
   end
 
   test "Ugly Print" do
@@ -108,14 +128,6 @@ defmodule XmlStreamTest do
     assert_xpath(doc, ~x"//sheet/row/cell/@prop2", 'bar"')
     assert_xpath(doc, ~x"//sheet/row/cell/@prop3", 'baz&')
     assert_xpath(doc, ~x"//sheet/row/cell/@prop4", '>')
-  end
-
-  test "API" do
-    assert declaration() == [decl: [version: "1.0", encoding: "UTF-8"]]
-    assert empty_element("empty-cell") == [{:empty_elem, "empty-cell", %{}}]
-    assert element("cell", "1") == [[{:open, "cell", %{}}], "1", [close: "cell"]]
-    assert element("cell", %{foo: "bar"}, "2") == [[{:open, "cell", %{foo: "bar"}}], "2", [close: "cell"]]
-    assert content("3") == [const: "3"]
   end
 
   test "Memory Usage" do
