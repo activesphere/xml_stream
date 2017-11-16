@@ -49,15 +49,19 @@ defmodule XmlStream.Print do
       String.duplicate(indent_with, level)
     end
 
+    defp safe_subtract(num) do
+      if num > 0, do: num - 1, else: 0
+    end
+
     defp calculate_alignment(node, {level, last}) do
       case elem(node, 0) do
         :open -> {{level + 1, false}, ["\n", indent(level)]}
-        :const -> {{level - 1, true}, []}
+        :const -> {{safe_subtract(level), true}, []}
         :close ->
           if last do
             {{level, false}, []}
           else
-            {{level - 1, false}, ["\n", indent(level - 1)]}
+            {{safe_subtract(level), false}, ["\n", indent(safe_subtract(level))]}
           end
         :empty_elem -> {{level, false}, ["\n", indent(level)]}
         _ -> {{level, false}, [indent(level)]}
