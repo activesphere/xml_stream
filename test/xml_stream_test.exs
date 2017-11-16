@@ -6,18 +6,28 @@ defmodule XmlStreamTest do
   import SweetXml, only: [sigil_x: 2, xpath: 2, parse: 1]
 
   test "Pretty Print" do
-    expected_pretty = ~s(<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n) <>
-      ~s(<workbook date=\"false\"/>\n<sheet>\n\t<row/>\n\t<row>\n\t\t) <>
-      ~s(<cell foo=\"bar\">1</cell>\n\t\t<cell/>\n\t</row>\n\t<row>\n\t\t) <>
-      ~s(<cell/>\n\t\t<cell foo=\"bar\">1</cell>\n\t</row>\n\t<row/>\n</sheet>)
+    expected_pretty = """
+<?xml version="1.0" encoding="UTF-8"?>
+<workbook date="false"/>
+<sheet>
+	<row/>
+	<row>
+		<cell foo="bar">1</cell>
+		<cell/>
+	</row>
+	<row>
+		<cell/>
+		<cell foo="bar">1</cell>
+	</row>
+	<row/>
+</sheet>
+"""
 
-    assert expected_pretty == pretty_out()
+    assert expected_pretty == pretty_out() <> "\n"
   end
 
   test "Ugly Print" do
-    expected_ugly = ~s(<?xml version="1.0" encoding="UTF-8"?>) <>
-      ~s(<workbook date="false"/><sheet><row/><row><cell foo="bar">1</cell>) <>
-      ~s(<cell/></row><row><cell/><cell foo="bar">1</cell></row><row/></sheet>)
+    expected_ugly = ~S(<?xml version="1.0" encoding="UTF-8"?><workbook date="false"/><sheet><row/><row><cell foo="bar">1</cell><cell/></row><row><cell/><cell foo="bar">1</cell></row><row/></sheet>)
 
     assert expected_ugly == ugly_out()
   end
@@ -72,13 +82,9 @@ defmodule XmlStreamTest do
       element("row", cells)
     end)
 
-    options = [
-      printer: XmlStream.Print.Pretty
-    ]
-
     usage_before = memory_now()
     Logger.debug "Memory usage before: #{usage_before}"
-    stream([declaration(), element("sheet", rows)], options)
+    stream([declaration(), element("sheet", rows)], [printer: XmlStream.Print.Pretty])
     |> Stream.run
 
     usage_after = memory_now()
