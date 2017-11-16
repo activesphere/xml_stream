@@ -7,11 +7,11 @@ defmodule XmlStream.Printer.Pretty do
   end
 
   def print({:open, name, attrs}) do
-    ["<", to_string(name), P.attrs_to_string(attrs), ">"]
+    ["<", P.encode_name(name), P.attrs_to_string(attrs), ">"]
   end
 
   def print({:close, name}) do
-    ["</", to_string(name), ">"]
+    ["</", P.encode_name(name), ">"]
   end
 
   def print({:decl, attrs}) do
@@ -19,7 +19,7 @@ defmodule XmlStream.Printer.Pretty do
   end
 
   def print({:empty_elem, name, attrs}) do
-    ["<", to_string(name), P.attrs_to_string(attrs), "/>"]
+    ["<", P.encode_name(name), P.attrs_to_string(attrs), "/>"]
   end
 
   def print({:const, value}) do

@@ -5,14 +5,14 @@ defmodule XmlStream.Printer.Ugly do
   def init(_), do: nil
 
   def print({:open, name, attrs}, _) when attrs == %{} or attrs == [] do
-    {["<", to_string(name), ">"], nil}
+    {["<", P.encode_name(name), ">"], nil}
   end
   def print({:open, name, attrs}, _) do
-    {["<", to_string(name), P.attrs_to_string(attrs), ">"], nil}
+    {["<", P.encode_name(name), P.attrs_to_string(attrs), ">"], nil}
   end
 
   def print({:close, name}, _) do
-    {["</", to_string(name), ">"], nil}
+    {["</", P.encode_name(name), ">"], nil}
   end
 
   def print({:decl, attrs}, _) do
@@ -20,10 +20,10 @@ defmodule XmlStream.Printer.Ugly do
   end
 
   def print({:empty_elem, name, attrs}, _) when attrs == %{} or attrs == [] do
-    {["<", to_string(name), "/>"], nil}
+    {["<", P.encode_name(name), "/>"], nil}
   end
   def print({:empty_elem, name, attrs}, _) do
-    {["<", to_string(name), P.attrs_to_string(attrs), "/>"], nil}
+    {["<", P.encode_name(name), P.attrs_to_string(attrs), "/>"], nil}
   end
 
   def print({:const, value}, _) do

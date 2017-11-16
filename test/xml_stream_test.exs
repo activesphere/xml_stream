@@ -160,6 +160,15 @@ defmodule XmlStreamTest do
     assert doc_string(element("head", content("一般'事項"))) == "<head>一般&apos;事項</head>"
     assert doc_string(element("author", %{name: "कफ़न"}, content(""))) == "<author name=\"कफ़न\"></author>"
     assert doc_string(element("author", %{name: "कफ़'न"}, content(""))) == "<author name=\"कफ़&apos;न\"></author>"
+    assert doc_string(element("कफ़", content(""))) == "<कफ़></कफ़>"
+    assert doc_string(element("a", content(""))) == "<a></a>"
+  end
 
+  test "invalid" do
+    assert_raise XmlStream.EncodeError, fn -> doc_string(element("", content(""))) end
+    assert_raise XmlStream.EncodeError, fn -> doc_string(empty_element("")) end
+    assert_raise XmlStream.EncodeError, fn -> doc_string(element("05", content(""))) end
+    assert_raise XmlStream.EncodeError, fn -> doc_string(empty_element("05")) end
+    assert_raise XmlStream.EncodeError, fn -> doc_string(doc_string(element("क>फ़", content("")))) end
   end
 end
