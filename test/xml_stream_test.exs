@@ -170,5 +170,6 @@ defmodule XmlStreamTest do
     assert_raise XmlStream.EncodeError, fn -> doc_string(element("05", content(""))) end
     assert_raise XmlStream.EncodeError, fn -> doc_string(empty_element("05")) end
     assert_raise XmlStream.EncodeError, fn -> doc_string(doc_string(element("क>फ़", content("")))) end
+    assert_raise XmlStream.EncodeError, fn -> doc_string(element("abc", %{"3" => "abc"}, content(""))) end
   end
 end

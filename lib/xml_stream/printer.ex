@@ -6,7 +6,7 @@ defmodule XmlStream.Printer do
 
   def attrs_to_string(attrs) do
     Enum.map(attrs, fn {key, value} ->
-      [" ", to_string(key), ~s(="), escape_binary(to_string(value)), ~s(")]
+      [" ", encode_name(key), ~s(="), escape_binary(to_string(value)), ~s(")]
     end)
   end
 
