@@ -19,7 +19,7 @@ defmodule XmlStream do
     [{:const, value}]
   end
 
-  @default_options [printer: XmlStream.Print.Ugly, indent_with: "\t"]
+  @default_options [printer: XmlStream.Printer.Ugly, indent_with: "\t"]
   def stream(node, options \\ []) do
     options = Keyword.merge(@default_options, options)
     printer = options[:printer]
