@@ -75,7 +75,7 @@ defmodule XmlStreamTest do
 
     usage_after = memory_now()
     Logger.debug "Memory usage after: #{usage_after}"
-    assert usage_after - usage_before <= 0.5
+    assert usage_after - usage_before <= 5
   end
 
   @sample_xml [
