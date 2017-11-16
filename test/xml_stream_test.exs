@@ -56,6 +56,14 @@ defmodule XmlStreamTest do
     assert_xpath(doc, ~x"//sheet/row/cell/@prop4", '>')
   end
 
+  test "API" do
+    assert declaration() == [decl: [version: "1.0", encoding: "UTF-8"]]
+    assert empty_element("empty-cell") == [{:empty_elem, "empty-cell", %{}}]
+    assert element("cell", "1") == [[{:open, "cell", %{}}], "1", [close: "cell"]]
+    assert element("cell", %{foo: "bar"}, "2") == [[{:open, "cell", %{foo: "bar"}}], "2", [close: "cell"]]
+    assert content("3") == [const: "3"]
+  end
+
   test "Memory Usage" do
     rows = Stream.map(1..1000, fn i ->
       cells = Stream.map(1..40, fn j ->
