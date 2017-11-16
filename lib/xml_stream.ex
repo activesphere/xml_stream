@@ -19,7 +19,7 @@ defmodule XmlStream do
     [{:const, value}]
   end
 
-  def stream(node, options) do
+  def stream(node, options \\ [printer: XmlStream.Print.Ugly]) do
     printer = options[:printer]
     nodes_stream = stream_builder(node)
     Stream.transform(nodes_stream, printer.init(), &printer.print/2)
