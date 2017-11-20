@@ -24,6 +24,14 @@ defmodule XmlStream.Printer do
     name
   end
 
+  def pi_target_name(name) do
+    if String.downcase(name) == "xml" do
+      raise EncodeError, message: "'xml' is a reserved name"
+    else
+      encode_name(name)
+    end
+  end
+
   defp validate_name!(""), do: raise EncodeError, message: "Invalid tag name"
   defp validate_name!(<<char::utf8>> <> rest) do
     validate_name_start!(char)

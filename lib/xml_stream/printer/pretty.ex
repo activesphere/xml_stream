@@ -22,6 +22,26 @@ defmodule XmlStream.Printer.Pretty do
     ["<", P.encode_name(name), P.attrs_to_string(attrs), "/>"]
   end
 
+  def print({:pi, target, attrs}) when attrs == %{} do
+    ["<?", P.pi_target_name(target), "?>"]
+  end
+
+  def print({:pi, target, attrs}) do
+    ["<?", P.pi_target_name(target), P.attrs_to_string(attrs), "?>"]
+  end
+
+  def print({:comment, text}) do
+    ["<!-- ", text, " -->"]
+  end
+
+  def print({:cdata, data}) do
+    ["<![CDATA[", data, "]]>"]
+  end
+
+  def print({:doctype, root_name, declaration}) do
+    ["<!DOCTYPE ", P.encode_name(root_name), " ", declaration, ">"]
+  end
+
   def print({:const, value}) do
     [P.escape_binary(to_string(value))]
   end
