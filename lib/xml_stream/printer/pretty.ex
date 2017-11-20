@@ -3,7 +3,8 @@ defmodule XmlStream.Printer.Pretty do
   @behaviour XmlStream.Printer
 
   def init(options \\ [indent_with: "\t"]) do
-    {0, false, options[:indent_with]}
+    # {indent-level, last-was-constant?, first-element?, options}
+    {0, false, true, options[:indent_with]}
   end
 
   def print({:open, name, attrs}) do
@@ -59,20 +60,22 @@ defmodule XmlStream.Printer.Pretty do
     if num > 0, do: num - 1, else: 0
   end
 
-  defp calculate_alignment(node, {level, last, indent_with}) do
+  defp calculate_alignment(node, {level, last_const, true, indent_with}) do
+    {{level, false, false, indent_with}, []}
+  end
+  defp calculate_alignment(node, {level, last, _, indent_with}) do
     case elem(node, 0) do
-      :decl -> {{level, false, indent_with}, []}
-      :open -> {{level + 1, false, indent_with}, ["\n", indent(level, indent_with)]}
-      :const -> {{safe_subtract(level), true, indent_with}, []}
+      :open -> {{level + 1, false, false, indent_with}, ["\n", indent(level, indent_with)]}
+      :const -> {{safe_subtract(level), true, false, indent_with}, []}
       :close ->
         if last do
-          {{level, false, indent_with}, []}
+          {{level, false, false, indent_with}, []}
         else
           new_level = safe_subtract(level)
-          {{new_level, false, indent_with}, ["\n", indent(new_level, indent_with)]}
+          {{new_level, false, false, indent_with}, ["\n", indent(new_level, indent_with)]}
         end
-      :empty_elem -> {{level, false, indent_with}, ["\n", indent(level, indent_with)]}
-      _ -> {{level, false, indent_with}, ["\n", indent(level, indent_with)]}
+      :empty_elem -> {{level, false, false, indent_with}, ["\n", indent(level, indent_with)]}
+      _ -> {{level, false, false, indent_with}, ["\n", indent(level, indent_with)]}
     end
   end
 end
