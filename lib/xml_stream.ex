@@ -15,6 +15,22 @@ defmodule XmlStream do
     [[{:open, name, attrs}], body, [{:close, name}]]
   end
 
+  def processing_instruction(name, attrs \\ %{}) do
+    [{:pi, name, attrs}]
+  end
+
+  def comment(text) do
+    [{:comment, text}]
+  end
+
+  def cdata(data) do
+    [{:cdata, data}]
+  end
+
+  def doctype(root_name, declaration) do
+    [{:doctype, root_name, declaration}]
+  end
+
   def content(value) do
     [{:const, value}]
   end

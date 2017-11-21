@@ -19,6 +19,26 @@ defmodule XmlStream.Printer.Ugly do
     {["<?xml", P.attrs_to_string(attrs), "?>"], nil}
   end
 
+  def print({:pi, target, attrs}, _) when attrs == %{} do
+    {["<?", P.pi_target_name(target), "?>"], nil}
+  end
+
+  def print({:pi, target, attrs}, _) do
+    {["<?", P.pi_target_name(target), P.attrs_to_string(attrs), "?>"], nil}
+  end
+
+  def print({:comment, text}, _) do
+    {["<!-- ", text, " -->"], nil}
+  end
+
+  def print({:cdata, data}, _) do
+    {["<![CDATA[", data, "]]>"], nil}
+  end
+
+  def print({:doctype, root_name, declaration}, _) do
+    {["<!DOCTYPE ", P.encode_name(root_name), " ", declaration, ">"], nil}
+  end
+
   def print({:empty_elem, name, attrs}, _) when attrs == %{} or attrs == [] do
     {["<", P.encode_name(name), "/>"], nil}
   end
