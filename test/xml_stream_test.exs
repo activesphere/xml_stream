@@ -41,7 +41,20 @@ defmodule XmlStreamTest do
   end
 
   defp assert_xpath(doc, path, expected) do
-    assert xpath(doc, path) == expected
+    ugly = doc_string(doc, [printer: XmlStream.Printer.Ugly])
+    |> parse
+    |> xpath(path)
+    assert ugly == expected
+
+    pretty = doc_string(doc, [printer: XmlStream.Printer.Pretty])
+    |> parse
+    |> xpath(path)
+    assert pretty == expected
+  end
+
+  defp assert_encode_error(doc) do
+    assert_raise XmlStream.EncodeError, fn -> doc_string(doc, [printer: XmlStream.Printer.Ugly]) end
+    assert_raise XmlStream.EncodeError, fn -> doc_string(doc, [printer: XmlStream.Printer.Pretty]) end
   end
 
   def memory_now do
@@ -116,7 +129,6 @@ defmodule XmlStreamTest do
       )
     ]
 
-    doc = parse(doc_string(doc))
     # First row text, should be '&<1'
     assert_xpath(doc, ~x"//sheet/row/cell/text()", '&<1')
 
@@ -164,13 +176,34 @@ defmodule XmlStreamTest do
     assert doc_string(element("a", content(""))) == "<a></a>"
   end
 
+  test "cdata" do
+    assert_xpath(element("d", cdata("")), ~x"//d/text()", '')
+    assert_xpath(element("d", cdata("hello")), ~x"//d/text()", 'hello')
+    assert_xpath(element("d", cdata("般事項")), ~x"//d/text()", '般事項')
+    assert_xpath(element("d", cdata("<![CDATA[nest]]>")), ~x"//d/text()", '<![CDATA[nest]]>')
+    assert_xpath(element("d", cdata("]]>")), ~x"//d/text()", ']]>')
+    assert_xpath(element("d", cdata("]]")), ~x"//d/text()", ']]')
+  end
+
+  test "comment" do
+    assert_xpath(element("d", comment("hello")), ~x"//d/comment()", 'hello')
+    assert_xpath(element("d", comment("")), ~x"//d/comment()", '')
+    assert_xpath(element("d", comment("-hello")), ~x"//d/comment()", '-hello')
+    assert_xpath(element("d", comment("- -hello")), ~x"//d/comment()", '- -hello')
+    assert_xpath(element("d", comment("- ")), ~x"//d/comment()", '- ')
+    assert_xpath(element("d", comment("般事項")), ~x"//d/comment()", '般事項')
+  end
+
   test "invalid" do
-    assert_raise XmlStream.EncodeError, fn -> doc_string(element("", content(""))) end
-    assert_raise XmlStream.EncodeError, fn -> doc_string(empty_element("")) end
-    assert_raise XmlStream.EncodeError, fn -> doc_string(element("05", content(""))) end
-    assert_raise XmlStream.EncodeError, fn -> doc_string(empty_element("05")) end
-    assert_raise XmlStream.EncodeError, fn -> doc_string(doc_string(element("क>फ़", content("")))) end
-    assert_raise XmlStream.EncodeError, fn -> doc_string(element("abc", %{"3" => "abc"}, content(""))) end
-    assert_raise XmlStream.EncodeError, fn -> doc_string(processing_instruction("xml")) end
+    assert_encode_error(element("", content("")))
+    assert_encode_error(empty_element(""))
+    assert_encode_error(element("05", content("")))
+    assert_encode_error(empty_element("05"))
+    assert_encode_error(element("क>फ़", content("")))
+    assert_encode_error(element("abc", %{"3" => "abc"}, content("")))
+    assert_encode_error(processing_instruction("xml"))
+    assert_encode_error(comment("hello -- world"))
+    assert_encode_error(comment("hello-"))
+    assert_encode_error(comment("-"))
   end
 end

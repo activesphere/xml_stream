@@ -4,12 +4,14 @@ defmodule XmlStream.Printer do
   @callback print(term, term) :: {iodata, term}
   @callback init(term) :: term
 
+  @doc false
   def attrs_to_string(attrs) do
     Enum.map(attrs, fn {key, value} ->
       [" ", encode_name(key), ~s(="), escape_binary(to_string(value)), ~s(")]
     end)
   end
 
+  @doc false
   def escape_binary(""), do: []
   def escape_binary("&" <> rest), do: ["&amp;" | escape_binary(rest)]
   def escape_binary("\"" <> rest), do: ["&quot;" | escape_binary(rest)]
@@ -18,12 +20,30 @@ defmodule XmlStream.Printer do
   def escape_binary(">" <> rest), do: ["&gt;" | escape_binary(rest)]
   def escape_binary(<<char :: utf8>> <> rest), do: [<<char :: utf8>> | escape_binary(rest)]
 
+  @doc false
+  def escape_cdata(""), do: []
+  def escape_cdata("]]>" <> rest), do: ["]]]]><![CDATA[>" | escape_cdata(rest)]
+  def escape_cdata(<<char :: utf8>> <> rest), do: [<<char :: utf8>> | escape_cdata(rest)]
+
+  @doc false
+  def encode_comment(text) do
+    validate_comment!(text)
+    text
+  end
+
+  defp validate_comment!(""), do: :ok
+  defp validate_comment!("-"), do: raise EncodeError, message: "comment can't end with '-'"
+  defp validate_comment!("--" <> _), do: raise EncodeError, message: "'--' is not allowed inside a comment"
+  defp validate_comment!(<<char :: utf8>> <> rest), do: validate_comment!(rest)
+
+  @doc false
   def encode_name(name) do
     name = to_string(name)
     validate_name!(name)
     name
   end
 
+  @doc false
   def pi_target_name(name) do
     if String.downcase(name) == "xml" do
       raise EncodeError, message: "'xml' is a reserved name"

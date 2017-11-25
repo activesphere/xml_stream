@@ -7,43 +7,43 @@ defmodule XmlStream.Printer.Pretty do
     {0, false, true, options[:indent_with]}
   end
 
-  def print({:open, name, attrs}) do
+  defp print({:open, name, attrs}) do
     ["<", P.encode_name(name), P.attrs_to_string(attrs), ">"]
   end
 
-  def print({:close, name}) do
+  defp print({:close, name}) do
     ["</", P.encode_name(name), ">"]
   end
 
-  def print({:decl, attrs}) do
+  defp print({:decl, attrs}) do
     ["<?xml", P.attrs_to_string(attrs), "?>"]
   end
 
-  def print({:empty_elem, name, attrs}) do
+  defp print({:empty_elem, name, attrs}) do
     ["<", P.encode_name(name), P.attrs_to_string(attrs), "/>"]
   end
 
-  def print({:pi, target, attrs}) when attrs == %{} do
+  defp print({:pi, target, attrs}) when attrs == %{} do
     ["<?", P.pi_target_name(target), "?>"]
   end
 
-  def print({:pi, target, attrs}) do
+  defp print({:pi, target, attrs}) do
     ["<?", P.pi_target_name(target), P.attrs_to_string(attrs), "?>"]
   end
 
-  def print({:comment, text}) do
-    ["<!-- ", text, " -->"]
+  defp print({:comment, text}) do
+    ["<!--", P.encode_comment(text), "-->"]
   end
 
-  def print({:cdata, data}) do
-    ["<![CDATA[", data, "]]>"]
+  defp print({:cdata, data}) do
+    ["<![CDATA[", P.escape_cdata(data), "]]>"]
   end
 
-  def print({:doctype, root_name, declaration}) do
+  defp print({:doctype, root_name, declaration}) do
     ["<!DOCTYPE ", P.encode_name(root_name), " ", declaration, ">"]
   end
 
-  def print({:const, value}) do
+  defp print({:const, value}) do
     [P.escape_binary(to_string(value))]
   end
 
@@ -66,7 +66,7 @@ defmodule XmlStream.Printer.Pretty do
   defp calculate_alignment(node, {level, last, _, indent_with}) do
     case elem(node, 0) do
       :open -> {{level + 1, false, false, indent_with}, ["\n", indent(level, indent_with)]}
-      :const -> {{safe_subtract(level), true, false, indent_with}, []}
+      x when x in [:const, :comment, :cdata] -> {{safe_subtract(level), true, false, indent_with}, []}
       :close ->
         if last do
           {{level, false, false, indent_with}, []}

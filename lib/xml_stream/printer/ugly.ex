@@ -28,11 +28,11 @@ defmodule XmlStream.Printer.Ugly do
   end
 
   def print({:comment, text}, _) do
-    {["<!-- ", text, " -->"], nil}
+    {["<!--", P.encode_comment(text), "-->"], nil}
   end
 
   def print({:cdata, data}, _) do
-    {["<![CDATA[", data, "]]>"], nil}
+    {["<![CDATA[", P.escape_cdata(data), "]]>"], nil}
   end
 
   def print({:doctype, root_name, declaration}, _) do
