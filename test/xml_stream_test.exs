@@ -27,9 +27,9 @@ defmodule XmlStreamTest do
   ]
 
   defp doc_string(elem_stream, options \\ [printer: XmlStream.Printer.Ugly]) do
-    stream(elem_stream, options)
+    stream!(elem_stream, options)
     |> Enum.to_list
-    |> Enum.join("")
+    |> IO.iodata_to_binary
   end
 
   defp pretty_out(indent_with \\ "\t") do
@@ -140,7 +140,7 @@ defmodule XmlStreamTest do
 
     usage_before = memory_now()
     Logger.debug "Memory usage before: #{usage_before}"
-    stream([declaration(), element("sheet", rows)], [printer: XmlStream.Printer.Pretty])
+    stream!([declaration(), element("sheet", rows)], [printer: XmlStream.Printer.Pretty])
     |> Stream.run
 
     usage_after = memory_now()
@@ -151,7 +151,7 @@ defmodule XmlStreamTest do
   test "Pretty Printer indent level" do
     broken_elem = element("pre", [content("foo"), empty_element("br")])
     broken_xml = List.insert_at(@sample_xml, 2, broken_elem)
-    stream(broken_xml, [printer: XmlStream.Printer.Pretty])
+    stream!(broken_xml, [printer: XmlStream.Printer.Pretty])
     |> Stream.run
   end
 

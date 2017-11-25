@@ -16,7 +16,7 @@ defmodule XmlStream.Printer do
   def escape_binary("'" <> rest), do: ["&apos;" | escape_binary(rest)]
   def escape_binary("<" <> rest), do: ["&lt;" | escape_binary(rest)]
   def escape_binary(">" <> rest), do: ["&gt;" | escape_binary(rest)]
-  def escape_binary(<<char :: utf8>> <> rest), do: [char | escape_binary(rest)]
+  def escape_binary(<<char :: utf8>> <> rest), do: [<<char :: utf8>> | escape_binary(rest)]
 
   def encode_name(name) do
     name = to_string(name)
