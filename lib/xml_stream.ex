@@ -1,6 +1,6 @@
 defmodule XmlStream do
   @moduledoc """
-  This module provides primitives to build xml document as a `Stream`
+  This module provides primitives to build XML document as a `Stream`
 
   ## Example
 
