@@ -37,7 +37,7 @@ defmodule XmlStream do
   @typedoc """
   The elements of `Enumerable` should be of type `t:fragment/0`
   """
-  @type body :: Enumerable.t
+  @type body :: fragment | Enumerable.t
 
   @spec declaration(attrs) :: fragment
   def declaration(attrs \\ [version: "1.0", encoding: "UTF-8"]) do
@@ -53,6 +53,7 @@ defmodule XmlStream do
   def element(name, body) do
     element(name, %{}, body)
   end
+
   @spec element(String.t, attrs, body) :: fragment
   def element(name, attrs, body) do
     [{:open, name, attrs}, body, {:close, name}]

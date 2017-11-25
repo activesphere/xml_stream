@@ -66,7 +66,8 @@ defmodule XmlStream.Printer do
   (char in 0xD8..0xF6) or
   (char in 0xF8..0x2FF) or
   (char in 0x370..0x37D) or
-  (char in 0x37F..0x1FFF) or
+  (char in 0x37F..0x1FFF), do: :ok
+  defp validate_name_start!(char) when
   (char in 0x200C..0x200D) or
   (char in 0x2070..0x218F) or
   (char in 0x2C00..0x2FEF) or
@@ -85,7 +86,8 @@ defmodule XmlStream.Printer do
   (char in 0xC0..0xD6) or
   (char in 0xD8..0xF6) or
   (char in 0xF8..0x37D) or
-  (char in 0x37F..0x1FFF) or
+  (char in 0x37F..0x1FFF), do: validate_name_rest!(rest)
+  defp validate_name_rest!(<<char::utf8>> <> rest) when
   (char in 0x200C..0x200D) or
   (char in 0x203F..0x2040) or
   (char in 0x2070..0x218F) or
