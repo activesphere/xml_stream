@@ -1,5 +1,5 @@
 defmodule XmlStream.EncodeError do
-  @type t :: %__MODULE__{message: String.t, value: any}
+  @type t :: %__MODULE__{message: String.t(), value: any}
 
   defexception message: nil, value: nil
 

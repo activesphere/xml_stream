@@ -7,6 +7,7 @@ defmodule XmlStream.Printer.Ugly do
   def print({:open, name, attrs}, _) when attrs == %{} or attrs == [] do
     {["<", P.encode_name(name), ">"], nil}
   end
+
   def print({:open, name, attrs}, _) do
     {["<", P.encode_name(name), P.attrs_to_string(attrs), ">"], nil}
   end
@@ -42,6 +43,7 @@ defmodule XmlStream.Printer.Ugly do
   def print({:empty_elem, name, attrs}, _) when attrs == %{} or attrs == [] do
     {["<", P.encode_name(name), "/>"], nil}
   end
+
   def print({:empty_elem, name, attrs}, _) do
     {["<", P.encode_name(name), P.attrs_to_string(attrs), "/>"], nil}
   end

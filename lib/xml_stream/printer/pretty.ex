@@ -63,10 +63,15 @@ defmodule XmlStream.Printer.Pretty do
   defp calculate_alignment(node, {level, last_const, true, indent_with}) do
     {{level, false, false, indent_with}, []}
   end
+
   defp calculate_alignment(node, {level, last, _, indent_with}) do
     case elem(node, 0) do
-      :open -> {{level + 1, false, false, indent_with}, ["\n", indent(level, indent_with)]}
-      x when x in [:const, :comment, :cdata] -> {{safe_subtract(level), true, false, indent_with}, []}
+      :open ->
+        {{level + 1, false, false, indent_with}, ["\n", indent(level, indent_with)]}
+
+      x when x in [:const, :comment, :cdata] ->
+        {{safe_subtract(level), true, false, indent_with}, []}
+
       :close ->
         if last do
           {{level, false, false, indent_with}, []}
@@ -74,8 +79,12 @@ defmodule XmlStream.Printer.Pretty do
           new_level = safe_subtract(level)
           {{new_level, false, false, indent_with}, ["\n", indent(new_level, indent_with)]}
         end
-      :empty_elem -> {{level, false, false, indent_with}, ["\n", indent(level, indent_with)]}
-      _ -> {{level, false, false, indent_with}, ["\n", indent(level, indent_with)]}
+
+      :empty_elem ->
+        {{level, false, false, indent_with}, ["\n", indent(level, indent_with)]}
+
+      _ ->
+        {{level, false, false, indent_with}, ["\n", indent(level, indent_with)]}
     end
   end
 end

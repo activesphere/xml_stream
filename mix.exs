@@ -8,7 +8,7 @@ defmodule XmlStream.Mixfile do
       app: :xml_stream,
       version: @version,
       elixir: "~> 1.4",
-      start_permanent: Mix.env == :prod,
+      start_permanent: Mix.env() == :prod,
       description: "Streaming XML builder",
       package: package(),
       docs: docs(),
@@ -35,15 +35,19 @@ defmodule XmlStream.Mixfile do
   end
 
   defp package do
-    %{licenses: ["MIT"],
+    %{
+      licenses: ["MIT"],
       links: %{"Github" => "https://github.com/activesphere/xml_stream"},
-      maintainers: ["ananthakumaran@gmail.com", "shinde.rohitt@gmail.com"]}
+      maintainers: ["ananthakumaran@gmail.com", "shinde.rohitt@gmail.com"]
+    }
   end
 
   defp docs do
-    [source_url: "https://github.com/activesphere/xml_stream",
-     source_ref: "v#{@version}",
-     main: XmlStream,
-     extras: ["README.md"]]
+    [
+      source_url: "https://github.com/activesphere/xml_stream",
+      source_ref: "v#{@version}",
+      main: XmlStream,
+      extras: ["README.md"]
+    ]
   end
 end

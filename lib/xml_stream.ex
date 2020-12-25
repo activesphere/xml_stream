@@ -31,55 +31,55 @@ defmodule XmlStream do
   Could be either `Keyword` or `map`. Order of the attributes are
   preserved in case of `Keyword`
   """
-  @type attrs :: map | Keyword.t
+  @type attrs :: map | Keyword.t()
   @opaque fragment :: [tuple | fragment]
 
   @typedoc """
   The elements of `Enumerable` should be of type `t:fragment/0`
   """
-  @type body :: fragment | Enumerable.t
+  @type body :: fragment | Enumerable.t()
 
   @spec declaration(attrs) :: fragment
   def declaration(attrs \\ [version: "1.0", encoding: "UTF-8"]) do
     [{:decl, attrs}]
   end
 
-  @spec empty_element(String.t, attrs) :: fragment
+  @spec empty_element(String.t(), attrs) :: fragment
   def empty_element(name, attrs \\ %{}) do
     [{:empty_elem, name, attrs}]
   end
 
-  @spec element(String.t, body) :: fragment
+  @spec element(String.t(), body) :: fragment
   def element(name, body) do
     element(name, %{}, body)
   end
 
-  @spec element(String.t, attrs, body) :: fragment
+  @spec element(String.t(), attrs, body) :: fragment
   def element(name, attrs, body) do
     [{:open, name, attrs}, body, {:close, name}]
   end
 
-  @spec processing_instruction(String.t, attrs) :: fragment
+  @spec processing_instruction(String.t(), attrs) :: fragment
   def processing_instruction(name, attrs \\ %{}) do
     [{:pi, name, attrs}]
   end
 
-  @spec comment(String.t) :: fragment
+  @spec comment(String.t()) :: fragment
   def comment(text) do
     [{:comment, text}]
   end
 
-  @spec cdata(String.t) :: fragment
+  @spec cdata(String.t()) :: fragment
   def cdata(text) do
     [{:cdata, text}]
   end
 
-  @spec doctype(String.t, String.t) :: fragment
+  @spec doctype(String.t(), String.t()) :: fragment
   def doctype(root_name, declaration) do
     [{:doctype, root_name, declaration}]
   end
 
-  @spec content(String.t) :: fragment
+  @spec content(String.t()) :: fragment
   def content(text) do
     [{:const, text}]
   end
@@ -96,10 +96,11 @@ defmodule XmlStream do
 
   * `:indent_with` (string) - The string that should be used for indentation. Defaults to `"\\t"`.
   """
-  @spec stream!(fragment, Keyword.t) :: Enumerable.t
+  @spec stream!(fragment, Keyword.t()) :: Enumerable.t()
   def stream!(nodes, options \\ []) do
     options = Keyword.merge(@default_options, options)
     printer = options[:printer]
+
     flatten(nodes)
     |> Stream.transform(printer.init(options), &printer.print/2)
   end

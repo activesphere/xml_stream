@@ -9,31 +9,37 @@ defmodule XmlStreamTest do
   @sample_xml [
     declaration(),
     empty_element("workbook", %{date: "false"}),
-    element("sheet",
-      [empty_element("row"),
-       element("row",
-         [
-           element("cell", %{foo: "bar"}, content("1")),
-           empty_element("cell")
-         ]),
-       element("row",
-         [
-           empty_element("cell"),
-           element("cell", %{foo: "bar"}, content("1")),
-         ]),
-       empty_element("row")
+    element(
+      "sheet",
+      [
+        empty_element("row"),
+        element(
+          "row",
+          [
+            element("cell", %{foo: "bar"}, content("1")),
+            empty_element("cell")
+          ]
+        ),
+        element(
+          "row",
+          [
+            empty_element("cell"),
+            element("cell", %{foo: "bar"}, content("1"))
+          ]
+        ),
+        empty_element("row")
       ]
     )
   ]
 
   defp doc_string(elem_stream, options \\ [printer: XmlStream.Printer.Ugly]) do
     stream!(elem_stream, options)
-    |> Enum.to_list
-    |> IO.iodata_to_binary
+    |> Enum.to_list()
+    |> IO.iodata_to_binary()
   end
 
   defp pretty_out(indent_with \\ "\t") do
-    doc_string(@sample_xml, [printer: XmlStream.Printer.Pretty, indent_with: indent_with])
+    doc_string(@sample_xml, printer: XmlStream.Printer.Pretty, indent_with: indent_with)
   end
 
   defp ugly_out() do
@@ -41,20 +47,27 @@ defmodule XmlStreamTest do
   end
 
   defp assert_xpath(doc, path, expected) do
-    ugly = doc_string(doc, [printer: XmlStream.Printer.Ugly])
-    |> parse
-    |> xpath(path)
+    ugly =
+      doc_string(doc, printer: XmlStream.Printer.Ugly)
+      |> parse
+      |> xpath(path)
+
     assert ugly == expected
 
-    pretty = doc_string(doc, [printer: XmlStream.Printer.Pretty])
-    |> parse
-    |> xpath(path)
+    pretty =
+      doc_string(doc, printer: XmlStream.Printer.Pretty)
+      |> parse
+      |> xpath(path)
+
     assert pretty == expected
   end
 
   defp assert_encode_error(doc) do
-    assert_raise XmlStream.EncodeError, fn -> doc_string(doc, [printer: XmlStream.Printer.Ugly]) end
-    assert_raise XmlStream.EncodeError, fn -> doc_string(doc, [printer: XmlStream.Printer.Pretty]) end
+    assert_raise XmlStream.EncodeError, fn -> doc_string(doc, printer: XmlStream.Printer.Ugly) end
+
+    assert_raise XmlStream.EncodeError, fn ->
+      doc_string(doc, printer: XmlStream.Printer.Pretty)
+    end
   end
 
   def memory_now do
@@ -64,67 +77,75 @@ defmodule XmlStreamTest do
   # Tests
   test "Pretty Print (tabs)" do
     expected_pretty = """
-<?xml version="1.0" encoding="UTF-8"?>
-<workbook date="false"/>
-<sheet>
-	<row/>
-	<row>
-		<cell foo="bar">1</cell>
-		<cell/>
-	</row>
-	<row>
-		<cell/>
-		<cell foo="bar">1</cell>
-	</row>
-	<row/>
-</sheet>
-"""
+    <?xml version="1.0" encoding="UTF-8"?>
+    <workbook date="false"/>
+    <sheet>
+    	<row/>
+    	<row>
+    		<cell foo="bar">1</cell>
+    		<cell/>
+    	</row>
+    	<row>
+    		<cell/>
+    		<cell foo="bar">1</cell>
+    	</row>
+    	<row/>
+    </sheet>
+    """
 
     assert expected_pretty == pretty_out() <> "\n"
   end
 
   test "Pretty Print (spaces)" do
     expected_pretty = """
-<?xml version="1.0" encoding="UTF-8"?>
-<workbook date="false"/>
-<sheet>
- <row/>
- <row>
-  <cell foo="bar">1</cell>
-  <cell/>
- </row>
- <row>
-  <cell/>
-  <cell foo="bar">1</cell>
- </row>
- <row/>
-</sheet>
-"""
+    <?xml version="1.0" encoding="UTF-8"?>
+    <workbook date="false"/>
+    <sheet>
+     <row/>
+     <row>
+      <cell foo="bar">1</cell>
+      <cell/>
+     </row>
+     <row>
+      <cell/>
+      <cell foo="bar">1</cell>
+     </row>
+     <row/>
+    </sheet>
+    """
+
     assert expected_pretty == pretty_out(" ") <> "\n"
   end
 
   test "Ugly Print" do
-    expected_ugly = ~S(<?xml version="1.0" encoding="UTF-8"?><workbook date="false"/><sheet><row/><row><cell foo="bar">1</cell><cell/></row><row><cell/><cell foo="bar">1</cell></row><row/></sheet>)
+    expected_ugly =
+      ~S(<?xml version="1.0" encoding="UTF-8"?><workbook date="false"/><sheet><row/><row><cell foo="bar">1</cell><cell/></row><row><cell/><cell foo="bar">1</cell></row><row/></sheet>)
 
     assert expected_ugly == ugly_out()
   end
 
   test "Escapes" do
     common_attrs = %{prop1: "'foo", prop2: "bar\"", prop3: "baz&", prop4: ">"}
+
     doc = [
       declaration(),
-      element("sheet",
+      element(
+        "sheet",
         [
-          element("row",
+          element(
+            "row",
             [
               element("cell", common_attrs, content("&<1")),
-              element("cell", common_attrs, content("1")),
-            ]),
-          element("row",
+              element("cell", common_attrs, content("1"))
+            ]
+          ),
+          element(
+            "row",
             [
               element("cell", common_attrs, content("<&2")),
-              element("cell", common_attrs, content("<&2")),
-            ]),
+              element("cell", common_attrs, content("<&2"))
+            ]
+          )
         ]
       )
     ]
@@ -143,35 +164,45 @@ defmodule XmlStreamTest do
   end
 
   test "Memory Usage" do
-    rows = Stream.map(1..1000, fn i ->
-      cells = Stream.map(1..40, fn j ->
-        element("cell", %{row: to_string(i), column: to_string(j)}, content(to_string(i)))
+    rows =
+      Stream.map(1..1000, fn i ->
+        cells =
+          Stream.map(1..40, fn j ->
+            element("cell", %{row: to_string(i), column: to_string(j)}, content(to_string(i)))
+          end)
+
+        element("row", cells)
       end)
-      element("row", cells)
-    end)
 
     usage_before = memory_now()
-    Logger.debug "Memory usage before: #{usage_before}"
-    stream!([declaration(), element("sheet", rows)], [printer: XmlStream.Printer.Pretty])
-    |> Stream.run
+    Logger.debug("Memory usage before: #{usage_before}")
+
+    stream!([declaration(), element("sheet", rows)], printer: XmlStream.Printer.Pretty)
+    |> Stream.run()
 
     usage_after = memory_now()
-    Logger.debug "Memory usage after: #{usage_after}"
+    Logger.debug("Memory usage after: #{usage_after}")
     assert usage_after - usage_before <= 5
   end
 
   test "Pretty Printer indent level" do
     broken_elem = element("pre", [content("foo"), empty_element("br")])
     broken_xml = List.insert_at(@sample_xml, 2, broken_elem)
-    stream!(broken_xml, [printer: XmlStream.Printer.Pretty])
-    |> Stream.run
+
+    stream!(broken_xml, printer: XmlStream.Printer.Pretty)
+    |> Stream.run()
   end
 
   test "utf8" do
     assert doc_string(element("head", content("一般事項"))) == "<head>一般事項</head>"
     assert doc_string(element("head", content("一般'事項"))) == "<head>一般&apos;事項</head>"
-    assert doc_string(element("author", %{name: "कफ़न"}, content(""))) == "<author name=\"कफ़न\"></author>"
-    assert doc_string(element("author", %{name: "कफ़'न"}, content(""))) == "<author name=\"कफ़&apos;न\"></author>"
+
+    assert doc_string(element("author", %{name: "कफ़न"}, content(""))) ==
+             "<author name=\"कफ़न\"></author>"
+
+    assert doc_string(element("author", %{name: "कफ़'न"}, content(""))) ==
+             "<author name=\"कफ़&apos;न\"></author>"
+
     assert doc_string(element("कफ़", content(""))) == "<कफ़></कफ़>"
     assert doc_string(element("a", content(""))) == "<a></a>"
   end
