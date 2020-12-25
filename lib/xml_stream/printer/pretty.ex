@@ -60,7 +60,7 @@ defmodule XmlStream.Printer.Pretty do
     if num > 0, do: num - 1, else: 0
   end
 
-  defp calculate_alignment(node, {level, last_const, true, indent_with}) do
+  defp calculate_alignment(_node, {level, _last_const, true, indent_with}) do
     {{level, false, false, indent_with}, []}
   end
 

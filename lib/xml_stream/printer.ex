@@ -37,7 +37,7 @@ defmodule XmlStream.Printer do
   defp validate_comment!("--" <> _),
     do: raise(EncodeError, message: "'--' is not allowed inside a comment")
 
-  defp validate_comment!(<<char::utf8>> <> rest), do: validate_comment!(rest)
+  defp validate_comment!(<<_char::utf8>> <> rest), do: validate_comment!(rest)
 
   @doc false
   def encode_name(name) do
