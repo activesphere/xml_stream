@@ -28,7 +28,7 @@ defmodule XmlStream.Mixfile do
 
   defp deps do
     [
-      {:ex_doc, "~> 0.18", only: :dev},
+      {:ex_doc, "~> 0.31", only: :dev, runtime: false},
       {:sweet_xml, "~> 0.6", only: [:dev, :test]},
       {:exprof, "~> 0.2.0", only: :dev}
     ]
