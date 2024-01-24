@@ -151,16 +151,16 @@ defmodule XmlStreamTest do
     ]
 
     # First row text, should be '&<1'
-    assert_xpath(doc, ~x"//sheet/row/cell/text()", '&<1')
+    assert_xpath(doc, ~x"//sheet/row/cell/text()", ~c"&<1")
 
     # Second row text, should be '<&2'
-    assert_xpath(doc, ~x"//sheet/row[2]/cell/text()", '<&2')
+    assert_xpath(doc, ~x"//sheet/row[2]/cell/text()", ~c"<&2")
 
     # Attributes
-    assert_xpath(doc, ~x"//sheet/row/cell/@prop1", '\'foo')
-    assert_xpath(doc, ~x"//sheet/row/cell/@prop2", 'bar"')
-    assert_xpath(doc, ~x"//sheet/row/cell/@prop3", 'baz&')
-    assert_xpath(doc, ~x"//sheet/row/cell/@prop4", '>')
+    assert_xpath(doc, ~x"//sheet/row/cell/@prop1", ~c"'foo")
+    assert_xpath(doc, ~x"//sheet/row/cell/@prop2", ~c"bar\"")
+    assert_xpath(doc, ~x"//sheet/row/cell/@prop3", ~c"baz&")
+    assert_xpath(doc, ~x"//sheet/row/cell/@prop4", ~c">")
   end
 
   test "Memory Usage" do
@@ -208,21 +208,21 @@ defmodule XmlStreamTest do
   end
 
   test "cdata" do
-    assert_xpath(element("d", cdata("")), ~x"//d/text()", '')
-    assert_xpath(element("d", cdata("hello")), ~x"//d/text()", 'hello')
-    assert_xpath(element("d", cdata("般事項")), ~x"//d/text()", '般事項')
-    assert_xpath(element("d", cdata("<![CDATA[nest]]>")), ~x"//d/text()", '<![CDATA[nest]]>')
-    assert_xpath(element("d", cdata("]]>")), ~x"//d/text()", ']]>')
-    assert_xpath(element("d", cdata("]]")), ~x"//d/text()", ']]')
+    assert_xpath(element("d", cdata("")), ~x"//d/text()", ~c"")
+    assert_xpath(element("d", cdata("hello")), ~x"//d/text()", ~c"hello")
+    assert_xpath(element("d", cdata("般事項")), ~x"//d/text()", ~c"般事項")
+    assert_xpath(element("d", cdata("<![CDATA[nest]]>")), ~x"//d/text()", ~c"<![CDATA[nest]]>")
+    assert_xpath(element("d", cdata("]]>")), ~x"//d/text()", ~c"]]>")
+    assert_xpath(element("d", cdata("]]")), ~x"//d/text()", ~c"]]")
   end
 
   test "comment" do
-    assert_xpath(element("d", comment("hello")), ~x"//d/comment()", 'hello')
-    assert_xpath(element("d", comment("")), ~x"//d/comment()", '')
-    assert_xpath(element("d", comment("-hello")), ~x"//d/comment()", '-hello')
-    assert_xpath(element("d", comment("- -hello")), ~x"//d/comment()", '- -hello')
-    assert_xpath(element("d", comment("- ")), ~x"//d/comment()", '- ')
-    assert_xpath(element("d", comment("般事項")), ~x"//d/comment()", '般事項')
+    assert_xpath(element("d", comment("hello")), ~x"//d/comment()", ~c"hello")
+    assert_xpath(element("d", comment("")), ~x"//d/comment()", ~c"")
+    assert_xpath(element("d", comment("-hello")), ~x"//d/comment()", ~c"-hello")
+    assert_xpath(element("d", comment("- -hello")), ~x"//d/comment()", ~c"- -hello")
+    assert_xpath(element("d", comment("- ")), ~x"//d/comment()", ~c"- ")
+    assert_xpath(element("d", comment("般事項")), ~x"//d/comment()", ~c"般事項")
   end
 
   test "invalid" do
