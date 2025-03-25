@@ -31,7 +31,7 @@ defmodule XmlStream do
   Could be either `Keyword` or `map`. Order of the attributes are
   preserved in case of `Keyword`
   """
-  @type attrs :: map | Keyword.t() | [{:binary, :binary}]
+  @type attrs :: map | Keyword.t() | [{binary(), binary()}]
   @type fragment :: [tuple | fragment]
 
   @typedoc """
