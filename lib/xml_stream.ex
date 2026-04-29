@@ -101,14 +101,45 @@ defmodule XmlStream do
     options = Keyword.merge(@default_options, options)
     printer = options[:printer]
 
-    flatten(nodes)
-    |> Stream.transform(printer.init(options), &printer.print/2)
+    Stream.resource(
+      fn -> {[{:enum, nodes}], printer.init(options)} end,
+      fn {stack, state} ->
+        case step(stack, state, printer) do
+          :done -> {:halt, {stack, state}}
+          {output, new_stack, new_state} -> {[output], {new_stack, new_state}}
+        end
+      end,
+      fn {stack, _state} ->
+        Enum.each(stack, fn
+          {:cont, cont} -> cont.({:halt, nil})
+          {:enum, _} -> :ok
+        end)
+      end
+    )
   end
 
-  defp flatten(node) do
-    Stream.flat_map(node, fn
-      operation when is_tuple(operation) -> [operation]
-      operation -> flatten(operation)
-    end)
+  defp step([], _state, _printer), do: :done
+
+  defp step([{:enum, enum} | rest], state, printer) do
+    case Enumerable.reduce(enum, {:cont, nil}, fn item, _ -> {:suspend, item} end) do
+      {:suspended, item, cont} -> handle(item, [{:cont, cont} | rest], state, printer)
+      _ -> step(rest, state, printer)
+    end
+  end
+
+  defp step([{:cont, cont} | rest], state, printer) do
+    case cont.({:cont, nil}) do
+      {:suspended, item, cont2} -> handle(item, [{:cont, cont2} | rest], state, printer)
+      _ -> step(rest, state, printer)
+    end
+  end
+
+  defp handle(item, stack, state, printer) when is_tuple(item) do
+    {output, new_state} = printer.print(item, state)
+    {output, stack, new_state}
+  end
+
+  defp handle(item, stack, state, printer) do
+    step([{:enum, item} | stack], state, printer)
   end
 end
